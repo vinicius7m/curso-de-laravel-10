@@ -5,14 +5,22 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUpdateSupport;
 use App\Models\Support;
+use App\Services\SupportService;
 use Illuminate\Http\Request;
 
 class SupportController extends Controller
 {
-    public function index(Support $support /* Injeção de dependência do Laravel */ )
+
+    public function __construct(
+        protected SupportService $service
+    )
+    {}
+
+    public function index(Request $request /*Support $support  Injeção de dependência do Laravel */ )
     {
+        $supports = $this->service->getAll($request->filter);
         // $support = new Support();
-        $supports = $support->all(); // Gera uma collection (Array)
+        // $supports = $support->all(); // Gera uma collection (Array)
         // dd($supports);
 
         return view('admin/supports/index', compact('supports'));
@@ -23,7 +31,7 @@ class SupportController extends Controller
         // Support::find($id) - busca pela primary key;
         // Support::where('id', $id)->first() - busca pela coluna que selecionar e retorna o primeiro registro;
         // Support::where('id', '=', $id)->first() - adiciona critério de comparação
-        if(!$support = Support::find($id)) {
+        if(!$support = $this->service->findOne($id)) {
             return back();
         }
 
@@ -47,7 +55,8 @@ class SupportController extends Controller
 
     public function edit(Support $support, string|int $id)
     {
-        if(!$support = $support->where('id', $id)->first()) {
+        // if(!$support = $support->where('id', $id)->first()) {
+        if(!$support = $this->service->findOne($id)) {
             return back();
         }
 
@@ -73,11 +82,7 @@ class SupportController extends Controller
 
     public function destroy(string|int $id)
     {
-        if(!$support = Support::find($id)) {
-            return back();
-        }
-
-        $support->delete();
+        $this->service->delete($id);
 
         return redirect()->route('supports.index');
     }
