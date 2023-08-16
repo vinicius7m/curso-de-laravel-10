@@ -21,7 +21,6 @@ class SupportController extends Controller
     public function index(Request $request /*Support $support  Injeção de dependência do Laravel */ )
     {
         $supports = $this->service->getAll($request->filter);
-        dd($supports);
         // $support = new Support();
         // $supports = $support->all(); // Gera uma collection (Array)
         // dd($supports);
